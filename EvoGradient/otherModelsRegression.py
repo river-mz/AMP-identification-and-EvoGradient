@@ -28,7 +28,7 @@ class CNN(nn.Module):
             [nn.Conv2d(1, self.num_filters, (k, self.hidden1)) for k in self.filter_sizes])
         self.dropout = nn.Dropout(self.dropout)
         self.fc2 = nn.Linear(self.num_filters, self.hidden2)
-        self.fc3 = nn.Linear(self.hidden2, self.num_classes)
+        self.new_fc3 = nn.Linear(self.hidden2, self.num_classes)
         self.softmax = nn.functional.softmax
         self.fc = nn.Linear(98*3,1)
         
@@ -74,10 +74,82 @@ class CNN(nn.Module):
         out = self.fc2(out)
         out = self.dropout(out)
         out = self.relu(out)
-        out = self.fc3(out)
+        out = self.new_fc3(out)
         # out:[128 10]
         return out
 
+
+
+class CNN(nn.Module):
+    def __init__(self,batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+        super(CNN, self).__init__()
+        self.batch_size = batch_size
+        self.embedding_size = embedding_size
+        self.num_tokens = num_tokens
+        self.num_classes = num_classes
+        self.num_heads = num_heads
+        self.filter_sizes = filter_sizes
+        self.num_filters = num_filters
+
+        self.hidden1 = 20
+        self.hidden2 = 60
+        self.hidden3 = 20
+        self.dropout = 0.3
+        self.fc1 = nn.Linear(self.embedding_size,self.hidden1)
+        self.relu = nn.ReLU()
+        self.convs = nn.ModuleList(
+            [nn.Conv2d(1, self.num_filters, (k, self.hidden1)) for k in self.filter_sizes])
+        self.dropout = nn.Dropout(self.dropout)
+        self.fc2 = nn.Linear(self.num_filters, self.hidden2)
+        self.new_fc3 = nn.Linear(self.hidden2, self.num_classes)
+        self.softmax = nn.functional.softmax
+        self.fc = nn.Linear(98*3,1)
+        
+        
+        
+
+
+    def conv_and_pool(self, x, conv): # [128,1,100,20]
+        # x: [128 1 32 300]
+        #print(x.shape) #[128, 1, 100, 20])
+        x = F.relu(conv(x)).squeeze(3)  # [128 100 [31 30 29]=90 ]
+        # x: [128 256 31]
+        # print(x.shape)
+        
+        # fc = nn.Linear(x.size(2),1)
+        # 利用线性FCN替代maxpooling
+        #x = F.max_pool1d(x, x.size(2)).squeeze(2)
+        
+        # x = fc(x).squeeze(2)
+        
+        # [N,100]
+        return x
+
+    def forward(self, x):
+        # tuple 2 [128,32]
+        # [N,100,26]
+        out = self.fc1(x) # in[128,100,20]  out[128,100,20] 
+        #  out: [128 32 300]
+        #[N,100,20]
+        out = out.unsqueeze(1) #in[128,100,20] out[128,1,100,20] 
+        # out: [128 1 32 300]   32 2 3 4     31 30 29=
+        # [N, 1, 100, 20]   
+        # print(out.shape)
+        out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 2)
+        # print(out.shape)
+        out = self.fc(out).squeeze(2)
+
+        # out: [128 768]
+        # [N, 300]
+        out = self.dropout(out)
+        out = self.relu(out)
+        # out: [128 100]
+        out = self.fc2(out)
+        out = self.dropout(out)
+        out = self.relu(out)
+        out = self.new_fc3(out)
+        # out:[128 10]
+        return out
 
 
 
@@ -117,8 +189,8 @@ class RCNN(nn.Module):
         self.fc1 = nn.Linear(self.embedding_size,self.hidden1)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(self.dropout_rate)
-        self.fc2 = nn.Linear(self.num_filters * len(self.filter_sizes), self.hidden2)
-        self.fc3 = nn.Linear(self.hidden2, self.num_classes)
+        # self.fc2 = nn.Linear(self.num_filters * len(self.filter_sizes), self.hidden2)
+        # self.fc3 = nn.Linear(self.hidden2, self.num_classes)
         
 
         self.fc1 = nn.Linear(self.embedding_size,self.hidden1)
@@ -126,7 +198,7 @@ class RCNN(nn.Module):
                             bidirectional=True, batch_first=True, dropout=self.dropout_rate)
         self.maxpool = nn.MaxPool1d(self.pad_size)
         self.fc4 = nn.Linear(self.pad_size,1)
-        self.fc = nn.Linear(self.hidden2 * 2 + self.hidden1, self.num_classes)
+        self.new_fc = nn.Linear(self.hidden2 * 2 + self.hidden1, self.num_classes)
         self.softmax = torch.softmax
 
     def forward(self, x):
@@ -140,7 +212,7 @@ class RCNN(nn.Module):
         # out = self.maxpool(out).squeeze() # [128 812]  [N 60]
         out = self.fc4(out).squeeze() # [128 812]  [N 60]
         out = self.dropout(out)
-        out = self.fc(out) # [128 10]  [N 2]
+        out = self.new_fc(out) # [128 10]  [N 2]
         return out
 
 
@@ -179,7 +251,7 @@ class lstm_att(nn.Module):
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(self.dropout_rate)
         self.fc2 = nn.Linear(self.hidden2*2, self.hidden2)
-        self.fc3 = nn.Linear(self.hidden2, self.num_classes)
+        self.new_fc3 = nn.Linear(self.hidden2, self.num_classes)
         
 
  
@@ -211,7 +283,7 @@ class lstm_att(nn.Module):
         out = self.fc2(out)   #[128 64]   [N 60]
         out = self.dropout(out)
         out = F.relu(out) 
-        out = self.fc3(out)  # [128, 10]     [N 2]
+        out = self.new_fc3(out)  # [128, 10]     [N 2]
         return out
 
 
@@ -254,7 +326,7 @@ class Transformer(nn.Module):
             # Encoder(config.dim_model, config.num_head, config.hidden, config.dropout)
             for _ in range(self.num_encoder)])
 
-        self.fc1 = nn.Linear(self.pad_size * self.hidden1, self.num_classes)
+        self.new_fc1 = nn.Linear(self.pad_size * self.hidden1, self.num_classes)
         # self.fc2 = nn.Linear(config.last_hidden, config.num_classes)
         self.fc = nn.Linear(self.embedding_size, self.hidden1)
 
@@ -265,7 +337,7 @@ class Transformer(nn.Module):
             out = encoder(out)
         out = out.view(out.size(0), -1) #[128 9600] [N 2000]
         # out = torch.mean(out, 1)
-        out = self.fc1(out) #[128 10]  [N 2]
+        out = self.new_fc1(out) #[128 10]  [N 2]
         return out
 
 

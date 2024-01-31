@@ -8,7 +8,7 @@ import copy
 '''cnn'''
 
 class CNN(nn.Module):
-    def __init__(self,batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self,batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(CNN, self).__init__()
         self.batch_size = batch_size
         self.embedding_size = embedding_size
@@ -21,7 +21,7 @@ class CNN(nn.Module):
         self.hidden1 = 20
         self.hidden2 = 60
         self.hidden3 = 20
-        self.dropout = 0.3
+        self.dropout = 0.2
         self.fc1 = nn.Linear(self.embedding_size,self.hidden1)
         self.relu = nn.ReLU()
         self.convs = nn.ModuleList(
@@ -90,7 +90,7 @@ class CNN(nn.Module):
 
 
 class RCNN(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(RCNN, self).__init__()
 
         # if config.embedding_pretrained is not None:
@@ -110,7 +110,7 @@ class RCNN(nn.Module):
         self.hidden1 = 20
         self.hidden2 = 60
         self.hidden3 = 20
-        self.dropout_rate = 0.3
+        self.dropout_rate = 0.1
         self.num_layers = 1
         self.pad_size = num_tokens
 
@@ -139,7 +139,6 @@ class RCNN(nn.Module):
         out = out.permute(0, 2, 1) #[128 812 32]   [N 60 100]
         # out = self.maxpool(out).squeeze() # [128 812]  [N 60]
         out = self.fc4(out).squeeze() # [128 812]  [N 60]
-        out = self.dropout(out)
         out = self.fc(out) # [128 10]  [N 2]
         return out
 
@@ -151,7 +150,7 @@ class RCNN(nn.Module):
 '''lstm_attention'''
 
 class lstm_att(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(lstm_att, self).__init__()
 
         # if config.embedding_pretrained is not None:
@@ -171,7 +170,7 @@ class lstm_att(nn.Module):
         self.hidden1 = 20
         self.hidden2 = 60
         self.hidden3 = 50
-        self.dropout_rate = 0.3
+        self.dropout_rate = 0.1
         self.num_layers = 1
         self.pad_size = num_tokens
         
@@ -206,11 +205,8 @@ class lstm_att(nn.Module):
         alpha = F.softmax(torch.matmul(M, self.w), dim=1).unsqueeze(-1)  # [128, 32, 1]   [N 100 1]
         out = H * alpha  # [128, 32, 256]     [N 100 120] [N 100 1]->[N 100 120]
         out = torch.sum(out, 1)  # [128, 256]    [N 120]
-        out = self.dropout(out)
         out = F.relu(out)   
         out = self.fc2(out)   #[128 64]   [N 60]
-        out = self.dropout(out)
-        out = F.relu(out) 
         out = self.fc3(out)  # [128, 10]     [N 2]
         return out
 
@@ -221,7 +217,7 @@ class lstm_att(nn.Module):
 
 # the following code is transformer structure:
 class Transformer(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(Transformer, self).__init__()
         # if config.embedding_pretrained is not None:
         #     self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
@@ -242,7 +238,7 @@ class Transformer(nn.Module):
         self.hidden1 = 20
         self.hidden2 = 128
         self.hidden3 = 20
-        self.dropout_rate = 0.3
+        self.dropout_rate = 0.1
         self.num_layers = 1
         self.pad_size = num_tokens
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -322,7 +318,7 @@ class Scaled_Dot_Product_Attention(nn.Module):
 
 
 class Multi_Head_Attention(nn.Module):
-    def __init__(self, dim_model, num_head, dropout=0.3):
+    def __init__(self, dim_model, num_head, dropout=0.0):
         super(Multi_Head_Attention, self).__init__()
         self.num_head = num_head
         assert dim_model % num_head == 0
@@ -380,7 +376,7 @@ class Position_wise_Feed_Forward(nn.Module):
 
 ## transformer2
 class Transformer2(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(Transformer2, self).__init__()
 
         # if config.embedding_pretrained is not None:
@@ -400,7 +396,7 @@ class Transformer2(nn.Module):
         self.hidden1 = 20
         self.hidden2 = 60
         self.hidden3 = 20
-        self.dropout_rate = 0.3
+        self.dropout_rate = 0.1
         self.num_layers = 1
         self.pad_size = num_tokens
 

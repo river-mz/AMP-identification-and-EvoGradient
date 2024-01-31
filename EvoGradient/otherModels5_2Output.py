@@ -8,7 +8,7 @@ import copy
 '''cnn'''
 
 class CNN(nn.Module):
-    def __init__(self,batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self,batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(CNN, self).__init__()
         self.batch_size = batch_size
         self.embedding_size = embedding_size
@@ -90,7 +90,7 @@ class CNN(nn.Module):
 
 
 class RCNN(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(RCNN, self).__init__()
 
         # if config.embedding_pretrained is not None:
@@ -151,7 +151,7 @@ class RCNN(nn.Module):
 '''lstm_attention'''
 
 class lstm_att(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(lstm_att, self).__init__()
 
         # if config.embedding_pretrained is not None:
@@ -221,7 +221,7 @@ class lstm_att(nn.Module):
 
 # the following code is transformer structure:
 class Transformer(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(Transformer, self).__init__()
         # if config.embedding_pretrained is not None:
         #     self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
@@ -380,7 +380,7 @@ class Position_wise_Feed_Forward(nn.Module):
 
 ## transformer2
 class Transformer2(nn.Module):
-    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=1,num_heads=4):
+    def __init__(self, batch_size=128,embedding_size=20,num_tokens=100,num_filters = 100,filter_sizes = (2,3,4),num_classes=2,num_heads=4):
         super(Transformer2, self).__init__()
 
         # if config.embedding_pretrained is not None:
